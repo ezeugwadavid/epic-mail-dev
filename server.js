@@ -17,27 +17,35 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// messages routes
+
 app.post("/api/v1/messages", Auth.verifyToken, mails.create);
-app.get("/api/v1/messages", Auth.verifyToken, mails.getMails);
+app.get("/api/v1/messages/mails", Auth.verifyToken, mails.getMails);
 app.get('/api/v1/messages/unread', Auth.verifyToken, mails.getUnread);
 app.get('/api/v1/messages/read', Auth.verifyToken, mails.getRead);
 app.get('/api/v1/messages/drafts', Auth.verifyToken, mails.getDrafts);
 app.put('/api/v1/messages/updateStatus', Auth.verifyToken, mails.updateStatus);
 app.get('/api/v1/messages/sentMail', Auth.verifyToken, mails.getSentMails);
+app.get('/api/v1/messages/getMail/:id', Auth.verifyToken, mails.getMail);
+app.delete('/api/v1/messages/deleteMail/:id', Auth.verifyToken, mails.deleteMail);
+app.delete('/api/v1/messages/retractMail/:id', Auth.verifyToken, mails.retractMail);
+app.put('/api/v1/messages/updateMessage/:id', Auth.verifyToken, mails.updateMessage);
 
 
-app.get("/api/v1/messages/:id", Auth.verifyToken, mails.getOne);
-app.put("/api/v1/messages/:id", Auth.verifyToken, mails.update);
-app.delete("/api/v1/messages/:id", Auth.verifyToken, mails.delete);
+
+
+  // create, login and delete users
 app.post("/api/v1/users", User.create);
 app.post("/api/v1/users/login", User.login);
 app.delete("/api/v1/users/me", Auth.verifyToken, User.delete);
 
-app.post("/api/v1/groupMessages", Auth.verifyToken, gMessage.create);
-app.get("/api/v1/messages", Auth.verifyToken, gMessage.getAll);
-app.get("/api/v1/messages/:id", Auth.verifyToken, gMessage.getOne);
-app.put("/api/v1/messages/:id", Auth.verifyToken, gMessage.update);
-app.delete("/api/v1/messages/:id", Auth.verifyToken, gMessage.delete);
+ app.post("/api/v1/groupMessages", Auth.verifyToken, gMessage.createGroup);
+
+ // Not to use
+// app.get("/api/v1/messages", Auth.verifyToken, gMessage.getAll);
+// app.get("/api/v1/messages/:id", Auth.verifyToken, gMessage.getOne);
+// app.put("/api/v1/messages/:id", Auth.verifyToken, gMessage.update);
+// app.delete("/api/v1/messages/:id", Auth.verifyToken, gMessage.delete);
 
 const PORT = process.env.PORT || 7000;
 

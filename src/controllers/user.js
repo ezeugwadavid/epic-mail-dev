@@ -92,12 +92,12 @@ const User = {
       if (!rows[0]) {
         return res
           .status(400)
-          .send({ message: "The credentials you provided is incorrect" });
+          .send({ message: "The email you provided is incorrect" });
       }
       if (!Helper.comparePassword(rows[0].password, req.body.password)) {
         return res
           .status(400)
-          .send({ message: "The credentials you provided is incorrect" });
+          .send({ message: "The password you provided is incorrect" });
       }
       const token = Helper.generateToken(rows[0].id, rows[0].email);
       console.log(token)

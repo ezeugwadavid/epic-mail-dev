@@ -83,6 +83,7 @@ const mails = {
       .then((result) => {
         if (result.rowCount !== 0 && (result.rows[0].email !== decEmail)) {
           const  userid  = result.rows[0];
+        //  console.log(result.rows[0]);
           return pool.query(createQuery, toMessage)
             .then((data) => {
 
@@ -302,7 +303,7 @@ const mails = {
     const  email  = req.user.email;
     const  id    = req.body.id;
     const { status } = req.body;
-    const updateMessageStatus = 'update messages set msgstatus=$3 where id=$2 and toemail=$1 returning *';
+    const updateMessageStatus = 'update messages set msgstatus=$3 where id=$2 and fromemail=$1 returning *';
 
     const values = [email, id, status];
 
@@ -325,12 +326,11 @@ const mails = {
             message: 'Error: message not found',
           });
       })// If the message status was not edited
-      .catch((err) => console.log(err) //res.status(500)
-      //  .send({
-        //  success: false,
-        //  message: 'Error: message status could not be edited. Try again'
-       // })
-        );
+      .catch((err) => res.status(500)
+        .send({
+          success: false,
+          message: 'Error: message status could not be edited. Try again'
+        }));
   },
 
 
@@ -346,8 +346,8 @@ const mails = {
    */
 
   getSentMails(req, res) {
-    const { userid } = req.user.id;
-    const getSentMessages = 'select * from messages where senderid = $1 and msgstatus = $2 order by createdOn desc';
+    const  userid  = req.user.id;
+    const getSentMessages = 'select * from messages where senderid = $1 and msgstatus = $2 order by created_date desc';
 
 
 
@@ -369,6 +369,48 @@ const mails = {
             message: 'Error: you have not sent any message'
           });
       })
+      .catch(err =>  res.status(500)
+        .send({
+          success: false,
+          message: 'Error: server not responding. Please try again.'
+       })
+        );
+  },
+
+
+
+
+  
+   /**
+   * Get a Mail
+   * @param {object} req 
+   * @param {object} res
+   * @returns {object} messages object 
+   */
+
+
+  getMail(req, res) {
+    const  userid  = req.user.id;
+    const  id  = req.params.id;
+    const getMessage = 'select * from messages left join userMessage on userid = $1 and messageid = id where id=$2';
+
+    pool.query(getMessage, [userid, id])
+      .then((data) => {
+        if (data.rowCount !== 0) {
+          const retrievedMessage = data.rows;
+          return res.status(200)
+            .send({
+              success: true,
+              message: 'Success: mail retrieved successfully!',
+              retrievedMessage
+            });
+        }
+        return res.status(400)
+          .send({
+            success: false,
+            message: 'Error: mail not found.'
+          });
+      })
       .catch(err => res.status(500)
         .send({
           success: false,
@@ -378,208 +420,287 @@ const mails = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   /**
-   * Get All messages
-   * @param {object} req 
-   * @param {object} res 
-   * @returns {object} messages array
-   */
-  async getAll(req, res) {
-    const findAllQuery = 'SELECT * FROM messages INNER JOIN users ON users.email=messages.fromemail WHERE users.id =1$';
-    try {
-      const { rows, rowCount } = await pool.query(findAllQuery, [req.user.id]);
-      return res.status(200).send({ rows, rowCount });
-    } catch(error) {
-      return res.status(400).send(error);
-    }
-  },
-  /**
-   * Get A message
+   * delete Mail
    * @param {object} req 
    * @param {object} res
-   * @returns {object} message object
+   * @returns {object} messages object 
    */
-  async getOne(req, res) {
-    const text = 'SELECT * FROM messages INNER JOIN users ON users.email=messages.fromemail WHERE messages.id = 1$ AND users.id = 2$';
-    try {
-      const { rows } = await pool.query(text, [req.params.id, req.user.id]);
-      if (!rows[0]) {
-        return res.status(404).send({'message': 'messages not found'});
-      }
-      return res.status(200).send(rows[0]);
-    } catch(error) {
-      return res.status(400).send(error)
-    }
+
+
+   deleteMail(req, res) {
+    const  userid  = req.user.id;
+    let  id  = req.params.id;
+    console.log(id)
+    const deleteMessage = 'delete from messages where id=$2 and senderid=$1 returning *';
+
+    pool.query(deleteMessage, [userid, id])
+      .then((data) => {
+        if (data.rowCount > 0) {
+          return res.status(200).send({
+            success: true,
+            message: 'Success: mail deleted successfully!'
+          });
+        }
+        // If the message was not found
+        return res.status(400)
+          .send({
+            success: false,
+            message: 'Error: mail not found',
+          });
+      })
+      .catch(err => res.status(500)
+        .send({ 
+          success: false,
+          message: 'Error: mail could not be deleted either because the mail was not found, or something bad happened. Please try again.'
+        })
+       );
   },
+
+
+
+
+
+
+
+
+
+
+
+  
   /**
-   * Update A Message
+   * retract Mail
    * @param {object} req 
-   * @param {object} res 
-   * @returns {object} updated message
+   * @param {object} res
+   * @returns {object} messages object 
    */
-  async update(req, res) {
-    const findOneQuery = 'SELECT * FROM messages WHERE id=$1 AND senderId = $2';
-    const updateOneQuery =`UPDATE messages
-      SET fromEmail=$1, subject=$2, message=$3, toemail=$4, msgstatus=$5, created_date=$6
-      WHERE id=$5 AND senderId = $6 returning *`;
-    try {
-      const { rows } = await pool.query(findOneQuery, [req.params.id, req.user.id]);
-      if(!rows[0]) {
-        return res.status(404).send({'message': 'message not found'});
+ retractMail(req, res) {
+   const  userid  = req.user.id
+   const  email  = req.user.email;
+   let  id  = req.params.id;
+   const retractUserMessage = 'delete from userMessage where messageid = $1 and userid=$2';
+   const retractMessage = 'delete from messages where senderid = $1 and id = $2';
+   const returnUser = 'select * from users where email = $1';
+
+   // return the person email was sent to
+   pool.query(returnUser, [email])
+    .then((info) => {
+      if (info.rowCount > 0) {
+        const userId = info.rows[0].userid;
+        // delete from messages
+        return pool.query(retractMessage, [userid, id])
+          .then((data) => {
+            if (data.rowCount > 0) {
+              // delete from userMessages
+              return pool.query(retractUserMessage, [id, userId])
+                .then((result) => {
+                  return res.status(200)
+                    .send({
+                      success: true,
+                      message: 'Success: mail retracted successfully!'
+                    });
+                })
+                .catch(err => res.status(400).send({
+                  success: false,
+                  message: 'Error: mail not found'
+                }));
+            }
+            return res.status(400)
+              .send({
+                success: false,
+                message: 'Error: mail not deleted'
+              });
+          })
+          .catch(err => res.status(500)
+            .send({
+              success: false,
+              message: 'Error: server not responding. Please try again.'
+            }));
       }
-      const values = [
-        req.body.fromEmail || rows[0].fromEmail,
-        req.body.subject || rows[0].subject,
-        req.body.message || rows[0].message,
-        req.body.toemail || rows[0].toemail,
-        req.body.msgstatus || rows[0].msgstatus,
-        NOW(),
-        req.params.id,
-        req.user.id
-      ];
-      const response = await pool.query(updateOneQuery, values);
-      return res.status(200).send(response.rows[0]);
-    } catch(err) {
-      return res.status(400).send(err);
-    }
-  },
-  /**
-   * Delete A message
+      return res.status(400).send({
+        success: false,
+        message: 'Error: problem retrieving email'
+      });
+    })
+    .catch(err => res.status(500).send({
+      success: false,
+      message: 'Error: server not responding, Try again later'
+    }));
+},
+
+
+
+
+
+/**
+   * Update Message
    * @param {object} req 
-   * @param {object} res 
-   * @returns {void} return statuc code 204 
+   * @param {object} res
+   * @returns {object} messages object 
    */
-  async delete(req, res) {
-    const deleteQuery = 'DELETE FROM messages WHERE id=$1 AND senderId = $2 returning *';
-    try {
-      const { rows } = await pool.query(deleteQuery, [req.params.id, req.user.id]);
-      if(!rows[0]) {
-        return res.status(404).send({'message': 'message not found'});
-      }
-      return res.status(204).send({ 'message': 'deleted' });
-    } catch(error) {
-      return res.status(400).send(error);
-    }
+  updateMessage(req, res) {
+    const  email  = req.user.email;
+    const  userid = req.user.id;
+    const  id    = req.params.id;
+    const { subject, message, toemail, msgstatus } = req.body;
+
+    const updateMessage = 'update messages set fromemail=$1, subject=$2, message=$3, toemail=$4, msgstatus=$5, created_date=$6 where id=$7 and senderid=$8 returning *';
+
+    const values = [ email, subject, message, toemail, msgstatus,  moment().format(), id, userid ];
+
+    pool.query(updateMessage, values)
+      .then((data) => {
+        if (data.rowCount > 0) {
+          const editedMessage = data.rows;
+          //  message query starts
+          return res.status(200)
+            .send({
+              success: true,
+              message: 'Success: message updated successfully!',
+              editedMessage
+            });
+        }
+        // If the message was not found
+        return res.status(500)
+          .send({
+            success: false,
+            message: 'Error: message not found',
+          });
+      })// If the message  was not edited
+      .catch((err) => res.status(500)
+        .send({
+          success: false,
+          message: 'Error: message status could not be edited. Try again'
+        })
+        );
   }
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 export default mails;

@@ -1,6 +1,20 @@
 //import momentjs from 'momentjs';
 import uuidv4 from 'uuid/v4';
-import pool from '../database/db';
+//import pool from '../database/db';
+import {Pool} from "pg";
+import moment from "moment";
+
+
+
+
+
+const connectionString =
+  "postgresql://postgres:66139868AH@localhost:5432/epicmail_db";
+const pool = new Pool({
+  connectionString: connectionString
+});
+
+
 
 
 const gMessage = {
@@ -10,6 +24,136 @@ const gMessage = {
    * @param {object} res
    * @returns {object} groupMessages object 
    */
+     createGroup(req, res) {
+     const ownerid = req.user.id;
+     const returnGroup = 'select * from groups where name = $1';
+     const createGroup = 'insert into groups ( id, ownerid, name, createdon) values ($1, $2, $3, $4) returning *';
+
+  
+      const { name } = req.body;
+  
+      const values = [uuidv4(), ownerid, name, moment().format()];
+  
+      // check if group exists
+      pool.query(returnGroup, [name])
+        .then((result) => {
+          if (result.rowCount === 0) {
+            return pool.query(createGroup, values)
+              .then((data) => {
+                const newGroup = data.rows[0];
+                return res.status(201).send({
+                  success: true,
+                  message: 'Success: group created successfully!',
+                  newGroup
+                });
+              })
+              .catch(err => res.status(500).send({
+               success: false,
+              message: 'Error: server did not respond. Please try again.'
+            }));
+          }
+          return res.status(400).send({
+            success: false,
+            message: 'Error: this name is taken. Please try again'
+          });
+        })
+        .catch(err =>  res.status(500).send({
+          success: false,
+          message: 'Error: server not responding. Please try again.'
+        })
+        );
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   async create(req, res) {
     const createQuery = `INSERT INTO
     GroupMessages(id, senderId, fromEmail, subject, message, toemail, msgstatus, created_date)
