@@ -9,7 +9,6 @@
     "start:dev": "nodemon server.js --exec babel-node",
     "test": "echo \"Error: no test specified\" && exit 1",
     "createTables": "babel-node -- ./src/database/db.js"
-    
   },
   "author": "David Ezeugwa",
   "license": "MIT",
@@ -34,9 +33,9 @@
     "validator": "^12.1.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.3",
+    "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.3",
-    "@babel/node": "^7.8.3",
+    "@babel/node": "^7.8.7",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.6"
   }
