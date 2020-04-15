@@ -139,7 +139,6 @@ const mails = {
 
   getUnread(req, res) {
     const email = req.user.email;
-    console.log(email);
 
     const getUnread =
       "select * from messages where toemail = $1 and msgstatus = $2 order by created_date desc";
@@ -375,8 +374,7 @@ const mails = {
     const toemail = req.user.email;
     let id = req.params.id;
 
-    const deleteMessage =
-      "delete from messages where id=$2 and toemail=$1 returning *";
+    const deleteMessage = "delete from messages where id=$2 and toemail=$1";
 
     pool
       .query(deleteMessage, [toemail, id])
@@ -393,9 +391,9 @@ const mails = {
           message: "Error: mail not found",
         });
       })
-      .catch((err) =>
-        res.status(500).send({
-          success: false,
+      .catch((err) => 
+         res.status(500).send({
+         success: false,
           message:
             "Error: mail could not be deleted either because the mail was not found, or something bad happened. Please try again.",
         })
@@ -414,7 +412,7 @@ const mails = {
     const email = req.user.email;
     let id = req.params.id;
     const retractUserMessage =
-      "delete from userMessage where messageid = $1 and userid=$2";
+      "delete from usermessage where messageid = $1 and userid=$2";
     const retractMessage =
       "delete from messages where senderid = $1 and id = $2";
     const returnUser = "select * from users where email = $1";
@@ -429,7 +427,7 @@ const mails = {
           return pool
             .query(retractMessage, [userid, id])
             .then((data) => {
-              if (data.rowCount > 0) {
+              if (data.rowCount == 0) {
                 // delete from userMessages
                 return pool
                   .query(retractUserMessage, [id, userId])
@@ -451,10 +449,10 @@ const mails = {
                 message: "Error: mail not deleted",
               });
             })
-            .catch((err) =>
+            .catch((err) => 
               res.status(500).send({
                 success: false,
-                message: "Error: server not responding. Please try again.",
+               message: "Error: server not responding. Please try again.",
               })
             );
         }

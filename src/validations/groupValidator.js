@@ -21,13 +21,7 @@ class GroupValidatorHandler {
               
           });
       }
-      if (name.includes(' ')) {
-        return res.status(400)
-          .send({
-            status: 400,
-            message: 'Error: name cannot include space.'
-          });
-      }
+
       name = name.trim().toString();
       if (name.length < 2) {
         return res.status(400).send({

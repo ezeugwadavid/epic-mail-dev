@@ -68,6 +68,8 @@ const User = {
    * @returns {object} user object
    */
   async login(req, res) {
+  
+
     if (!req.body.email || !req.body.password) {
       return res.status(400).send({ message: "Some values are missing" });
     }
@@ -90,7 +92,7 @@ const User = {
           .send({ message: "The password you provided is incorrect" });
       }
       const token = Helper.generateToken(rows[0].id, rows[0].email);
-      // console.log(token)
+      
       return res.status(200).send({ message: "login successful!" });
     } catch (error) {
       return res.status(400).send(error);

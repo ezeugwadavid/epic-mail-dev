@@ -2,7 +2,7 @@
 class UserValidatorHandler {
   static signupValidator(req, res, next) {
       let {
-        firstName, lastName, password
+        firstName, lastName, email, password
       } = req.body;
       
       // First name validation
@@ -21,13 +21,15 @@ class UserValidatorHandler {
           });
       }
 
-      if (firstName.includes(' ')) {
+      if (firstName === ' ') {
         return res.status(400)
-          .json({
+          .send({
             status: 400,
-            message: 'Error: firstName cannot include space.'
+            message: 'First cannot include space',
           });
       }
+
+      
 
 
       if (typeof firstName !== 'string') {
@@ -73,13 +75,15 @@ class UserValidatorHandler {
           });
       }
 
-      if (lastName.includes(' ')) {
+      if (lastName === ' ') {
         return res.status(400)
-          .json({
+          .send({
             status: 400,
-            message: 'Error: lastName cannot include space.'
+            message: 'lastName cannot include space',
           });
       }
+
+    
 
       if (typeof lastName !== 'string') {
         return res.status(400)
@@ -107,57 +111,51 @@ class UserValidatorHandler {
           });
       }
   
-      // Email Validation
-    //   if (email === undefined) {
-    //     return res.status(400)
-    //       .send({
-    //         status: 400,
-    //         message: 'Error: email field is required',
-    //       });
-    //   }
-    //   if (email === '') {
-    //     return res.status(400)
-    //       .send({
-    //         status: 400,
-    //         message: 'Error: email cannot be empty.'
-    //       });
-    //   }
-    //   if (email.includes(' ')) {
-    //     return res.status(400)
-    //       .send({
-    //         status: 400,
-    //         message: 'Error: email cannot include space.'
-    //       });
-    //   }
-    //   if (typeof email !== 'string') {
-    //     return res.status(400)
-    //       .send({
-    //         status: 400,
-    //         message: 'Error: email should be a string'
-    //       });
-    //   }
-    //   const foundEmail = users.find(user => user.email === email);
-    //   if (foundEmail) {
-    //     return res.status(409).send({
-    //       status: 409,
-    //       message: 'Error: email already exists!'
-    //     });
-    //   }
-    //   // email check: stackoverflow
-    //   const emailCheck = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$/;
-    //   if (!emailCheck.test(email)) {
-    //     return res.status(400).send({
-    //       status: 400,
-    //       message: 'Error: email format is invalid'
-    //     });
-    //   }
-    //   email = email.toLowerCase().trim();
-    //   if (email.length < 5 || email.length > 30) {
-    //     return res.status(400).send({
-    //       status: 400,
-    //       message: 'Error: email should be 10 to 30 characters long'
-    //     });
-    //   }
+     // Email Validation
+      if (email === undefined) {
+        return res.status(400)
+          .send({
+            status: 400,
+            message: 'Error: email field is required',
+          });
+      }
+      if (email === '') {
+        return res.status(400)
+          .send({
+            status: 400,
+            message: 'Error: email cannot be empty.'
+          });
+      }
+      if (email.includes(' ')) {
+        return res.status(400)
+          .send({
+            status: 400,
+            message: 'Error: email cannot include space.'
+          });
+      }
+      if (typeof email !== 'string') {
+        return res.status(400)
+          .send({
+            status: 400,
+            message: 'Error: email should be a string'
+          });
+      }
+    
+      // email check: stackoverflow
+      const emailCheck = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$/;
+      if (!emailCheck.test(email)) {
+        return res.status(400).send({
+          status: 400,
+          message: 'Error: email format is invalid'
+        });
+      }
+      email = email.toLowerCase().trim();
+      if (email.length < 5 || email.length > 30) {
+        return res.status(400).send({
+          status: 400,
+          message: 'Error: email should be 10 to 30 characters long'
+        });
+      }
   
       // Password Validation
       if (password === undefined) {
@@ -174,6 +172,16 @@ class UserValidatorHandler {
             message: 'Error: password field cannot be empty'
           });
       }
+
+      if (password.includes(' ')) {
+        return res.status(400)
+          .json({
+            status: 400,
+            message: 'Error: password cannot include space.'
+          });
+      }
+
+     
       if (password === ' ') {
         return res.status(400)
           .send({
@@ -355,6 +363,15 @@ class UserValidatorHandler {
             message: 'Error: password field cannot be empty'
           });
       }
+      if (password.includes(' ')) {
+        return res.status(400)
+          .send({
+            status: 400,
+            message: 'Error: password cannot contain spaces'
+          });
+      }
+
+
       if (password === '') {
         return res.status(400)
           .send({
@@ -362,13 +379,7 @@ class UserValidatorHandler {
             message: 'Error: password field cannot be empty'
           });
       }
-      if (password === ' ') {
-        return res.status(400)
-          .send({
-            status: 400,
-            message: 'Error: password cannot contain spaces'
-          });
-      }
+     
       if (typeof password !== 'string') {
         return res.status(400)
           .send({
@@ -382,6 +393,7 @@ class UserValidatorHandler {
 
     static passwordCheck(req, res, next){
    // password validation
+   let { password } = req.body;
    if (password === undefined) {
     return res.status(400)
       .send({

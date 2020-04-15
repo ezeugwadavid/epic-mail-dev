@@ -100,9 +100,9 @@ const groupController = {
     const userid = req.user.id;
     let id = req.params.id;
     const { name } = req.body;
-    const editGroup = "update groups set name=$2 where id=$1 returning *";
+    const editGroup = "update groups set name=$2 where id=$1 and ownerid=$3 returning *";
 
-    const values = [id, name];
+    const values = [id, name, userid];
 
     pool
       .query(editGroup, values)
@@ -186,6 +186,7 @@ const groupController = {
     pool
       .query(returnMember, [email])
       .then((result) => {
+           const memberid = result.rows[0].id
         if (result.rowCount > 0) {
           // select the user's group
           return pool.query(checkGroup, [ownerid]).then((detail) => {
@@ -193,7 +194,7 @@ const groupController = {
             const values = [
               uuidv4(),
               groupid,
-              result.rows[0].id,
+              memberid,
               email,
               moment().format(),
             ];
@@ -210,11 +211,11 @@ const groupController = {
                     newMember,
                   });
                 })
-                .catch((err) =>
-                  res.status(500).send({
-                    success: false,
-                    message: "Error: user not added. Try again",
-                  })
+                .catch((err) => console.log(err)
+                  // res.status(500).send({
+                  //   success: false,
+                  //   message: "Error: user not added. Try again",
+                  // })
                 );
             }
             return res.status(400).send({

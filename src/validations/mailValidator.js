@@ -60,6 +60,16 @@ class MailValidatorHandler {
   
           });
       }
+
+      if (subject === ' ') {
+        return res.status(400)
+          .send({
+            status: 400,
+            message: 'subject cannot include space',
+          });
+      }
+
+
       if (subject === '') {
         return res.status(400)
           .send({
@@ -87,6 +97,16 @@ class MailValidatorHandler {
   
           });
       }
+
+      if (message === ' ') {
+        return res.status(400)
+          .send({
+            status: 400,
+            message: 'mesage cannot include space',
+          });
+      }
+      
+
       message = message.replace(/ {1,}/g," ");
   
       next();
