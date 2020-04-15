@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
-//import pool from '../database/db';
-import pool from '../database/dbconnect';
 
 
-const Auth = {
+
+
+const Auth2 = {
   /**
    * Verify Token
    * @param {object} req
@@ -12,7 +12,7 @@ const Auth = {
    * @returns {object|void} response object
    */
   async verifyToken(req, res, next) {
-    const token = req.headers.authorization || req.body.token;
+    const token = req.params.token || req.body.token;
     const secret = process.env.SECRET_KEY;
 
     if (!token) {
@@ -22,14 +22,7 @@ const Auth = {
     try {
       decoded = await jwt.verify(token, secret);
 
-      const query = "SELECT * FROM users WHERE id = $1";
-
-      const rows = await pool.query(query, [decoded.userId]);
-      if (!rows) {
-        return res
-          .status(400)
-          .send({ message: "The token you provided is invalid" });
-      }
+    
       req.user = { id: decoded.userId, email: decoded.userEmail };
       next();
      
@@ -40,4 +33,4 @@ const Auth = {
   }
 };
 
-export default Auth;
+export default Auth2;

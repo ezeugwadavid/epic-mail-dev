@@ -33,15 +33,11 @@ const Helper = {
    * @param {string} id
    * @returns {string} token
    */
-  //jwt.sign({
-    //data: 'foobar'
-  //}, 'secret', { expiresIn: 60 * 60 });
-   
-
+ 
 
   generateToken(id, email) {
     
-    const secret = 'justanotherrandomsecretkey';
+    const secret = process.env.SECRET_KEY;
     const token = jwt.sign({
       userId: id,
       userEmail: email

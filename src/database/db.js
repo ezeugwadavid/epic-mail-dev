@@ -1,22 +1,10 @@
-const { Pool } = require("pg");
-const dotenv = require("dotenv");
+const pool  = require('./dbconnect');
 const uuidv4 = require("uuid/v4");
 uuidv4();
-dotenv.config();
 
-// const pool = new Pool({
-//   connectionString: process.env.DATABASE_URL
-// });
 
-const connectionString =
-  "postgresql://postgres:66139868AH@localhost:5432/epicmail_db";
-const pool = new Pool({
-  connectionString: connectionString
-});
 
-pool.on("connect", () => {
-  console.log("connected to the db");
-});
+
 
 /**
  * Create messages Table
@@ -26,6 +14,7 @@ const createMessagesTable = () => {
       messages(
         id UUID PRIMARY KEY,
         senderId UUID NOT NULL,
+        lastName CHARACTER VARYING(50) NOT NULL,
         fromEmail CHARACTER VARYING(100) NOT NULL,
         subject TEXT NOT NULL,
         message TEXT NOT NULL,
@@ -303,10 +292,10 @@ const dropAllTables = () => {
   dropUserMessageTable();
 };
 
-pool.on("remove", () => {
-  console.log("client removed");
-  process.exit(0);
-});
+//  pool.on("remove", () => {
+//    console.log("client removed");
+//    process.exit(0);
+//  });
 
 module.exports = {
   createMessagesTable,
